@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+   <meta charset="UTF-8">
+   <title>YOLOv8 Flask Tomato Fruit Disease Detection</title>
+   <style>
+     body{font-family: Arial, Helvetica, sans-serif;background-color: #f5f5f5;color:#555;padding : 20px;}               
+     h2,h3 {color:#333;}
+     form{margin-bottom:20px;}
+     img{ margin-top: 10px;border-radius: 8px;}
+     .result-box {
+      background-color: #fff;
+      padding: 12px;
+      margin-top: 15px;
+      border-left: 4px solid #4caf50;
+      border-radius: 5px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);}
+     label {font-weight: bold;display: block;margin-top: 10px;}
+     input[type="text"],
+     input[type="file"] {
+      width: 50%;
+      padding: 8px;
+      margin-top: 5px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;}
+     input[type="submit"] {
+      background-color:#4caf50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;}
+     ul{padding-left:20px;}
+       
+</style>
+</head>
+<body>
+   <h2> Chọn ảnh để phát hiện bệnh trên cà chua</h2>
+   <form method ="POST" enctype ="multipart/form-data">
+     <label for = "image">Chọn ảnh:</label><br>
+     <input type =  "file" id="image" name = "image" accept="image/*"><br><br>
+   <label>Hoặc chụp ảnh trực tiếp:</label><br>
+      <video id="video" width="480" height="360" autoplay style="display:none;"></video><br>
+    <canvas id="canvas" width="480" height="360" style="display:none;"></canvas>
+    <input type="hidden" id="captured_image" name="captured_image"><br>
+
+    <div>
+      <button type="button" id="startCam">Bật camera</button>
+      <button type="button" id="capture" style="display:none;">Chụp ảnh</button>
+      <button type="button" id="stopCam" style="display:none;">Tắt camera</button>
+    </div>
+
+    <br>
+     <input type = "submit" value = "Dự đoán">
+   </form>
+
+  {% if error%}
+     <p style = "color:red">{{error}}</p>
+  {% endif %}
+
+  {% if resultimg %}
+     <h3> Ảnh kết quả phát hiện trên cà chua:</h3>
+     <img src = "data:image/jpeg;base64,{{resultimg}}" width = "500"> 
+     
+      {% if processing_time %}
+        <p><strong>Thời gian xử lí toàn bộ:</strong>{{processing_time}}</p>
+      {% endif %}
+      {% if predict_time %}
+        <p><strong>Thời gian dự đoán:</strong>{{predict_time}}</p>
+      {% endif %}
+      
+      {% if info_list %}
+        <h3>Chi tiết:</h3>
+        {% for info in info_list %}
+          <div class="result-box">
+            <p><strong>Bệnh:</strong> {{ info.label }} <em>({{ info.label_en }})</em> – {{ info.confidence }}</p>
+
+            <p><strong>Triệu chứng:</strong></p>
+            <ul>
+                {% for tc in info.trieu_chung %}
+                    <li>{{ tc }}</li>
+                {% endfor %}
+            </ul>
+
+            <p><strong>Biện pháp:</strong></p>
+            <ul>
+                {% for bp in info.bien_phap %}
+                    <li>{{ bp }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endif %}
+
+   <script>
+  const video = document.getElementById('video');
+  const canvas = document.getElementById('canvas');
+  const startCam = document.getElementById('startCam');
+  const capture = document.getElementById('capture');
+  const stopCam = document.getElementById('stopCam');
+  const capturedInput = document.getElementById('captured_image');
+  const ctx = canvas.getContext('2d');
+  let stream;
+
+  // Khi bấm "Bật camera"
+  startCam.addEventListener('click', async () => {
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      video.srcObject = stream;
+      video.style.display = 'block';
+      capture.style.display = 'inline-block';
+      stopCam.style.display = 'inline-block';
+      startCam.style.display = 'none';
+    } catch (err) {
+      alert("Không thể truy cập camera: " + err);
+    }
+  });
+
+  // Khi bấm "Chụp ảnh"
+  capture.addEventListener('click', () => {
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    canvas.style.display = 'block';
+    capturedInput.value = canvas.toDataURL('image/jpeg');
+  });
+
+  // Khi bấm "Tắt camera"
+  stopCam.addEventListener('click', () => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      video.srcObject = null;
+    }
+    video.style.display = 'none';
+    capture.style.display = 'none';
+    stopCam.style.display = 'none';
+    startCam.style.display = 'inline-block';
+  });
+</script>
+</body>
+</html>
