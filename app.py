@@ -135,4 +135,5 @@ def index():
         return render_template("index.html",error = f"Error_Lỗi khi xử lý ảnh: {str(e)}")
   return render_template("index.html")# nếu là get request chỉ hiển thị form upload
 if __name__ == "__main__":
-  app.run(debug=True)
+  port= int(os.environ.get("PORT",5000)) #Lấy cổng do render cấp
+  app.run(debug=True,host="0.0.0.0",port=port)#Cho phép render truy cập
