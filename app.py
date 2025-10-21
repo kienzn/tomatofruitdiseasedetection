@@ -136,5 +136,6 @@ def index():
   return render_template("index.html")# nếu là get request chỉ hiển thị form upload
 if __name__ == "__main__":
   port= int(os.environ.get("PORT",5000)) #Lấy cổng do render cấp
-  app.run(host="0.0.0.0",port=port)#Cho phép render truy cập
+  app.run(debug=True,host="0.0.0.0",port=port)#Cho phép render truy cập
+
 
