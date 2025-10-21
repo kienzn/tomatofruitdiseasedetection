@@ -10,8 +10,8 @@ import time
 app = Flask(__name__) # khởi tạo ứng dụng flask, biến name là biến đặc biệt dc hỗ trợ giúp flask xác dịnh xem file nào là file chạy chính
 # Khởi tạo model yolo dc train r
 model_path = "best9.pt"
-assert os.path.exists(model_path)
-model = YOLO(model_path,task='detect')
+#assert os.path.exists(model_path)
+#model = YOLO(model_path,task='detect')
 # Nhãn bệnh song ngữ
 label_vietnam_english= {"Anthracnose":"Bệnh thán thư",
                         "Blossom_End_Rot":"Bệnh thối đáy quả",
@@ -137,5 +137,6 @@ def index():
 if __name__ == "__main__":
   port= int(os.environ.get("PORT",5000)) #Lấy cổng do render cấp
   app.run(debug=True,host="0.0.0.0",port=port)#Cho phép render truy cập
+
 
 
